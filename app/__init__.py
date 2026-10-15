@@ -17,9 +17,12 @@ def _database_url():
     url = os.environ.get("DATABASE_URL")
     if not url:
         return None
-    # Some providers hand out "postgres://", which SQLAlchemy no longer accepts.
-    if url.startswith("postgres://"):
-        url = "postgresql://" + url[len("postgres://"):]
+    # Supabase and others hand out "postgresql://" (or the old "postgres://").
+    # SQLAlchemy 2.1+ maps a bare "postgresql://" to the psycopg 3 driver, but we
+    # install psycopg2, so name that driver explicitly.
+    for prefix in ("postgres://", "postgresql://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg2://" + url[len(prefix):]
     return url
 
 

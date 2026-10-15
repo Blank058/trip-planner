@@ -68,4 +68,5 @@ GitHub Pages only serves static files, so it can't run the Flask app (saving res
 | `could not translate host name` or `Network is unreachable` | You used the *direct* connection string. Use the **Session pooler** one. |
 | `password authentication failed` | The password in `DATABASE_URL` is wrong or has unencoded symbols. |
 | `ModuleNotFoundError` | The build didn't install requirements; check the build command. |
+| `No module named 'psycopg'` | Fixed in the code; pull the latest `main`. (Workaround: start `DATABASE_URL` with `postgresql+psycopg2://` instead of `postgresql://`.) |
 | Share links start with `http://` | Make sure you're opening the `https://` Render URL; the app copies the scheme you visited with. |
