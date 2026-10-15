@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% from "_results.html" import results_panel %}
+{% block title %}Admin · {{ trip.name }}{% endblock %}
+{% block content %}
+<hgroup>
+  <h1>{{ trip.name }}</h1>
+  <p>Admin dashboard · {{ results.total }} response{{ '' if results.total == 1 else 's' }} · responses {{ 'open' if trip.is_open else 'closed' }}</p>
+</hgroup>
+
+{% if just_created %}
+<article class="created">
+  <strong>Your trip is ready.</strong>
+  <p>Bookmark your <strong>admin link</strong> below. It's the only way back to this page from another device, and anyone who has it can manage the trip.</p>
+</article>
+{% endif %}
+
+<div class="links">
+  <label>Share link (send this to the group)
+    <div class="copy-row"><input readonly value="{{ share_url }}" id="share-url"><button type="button" data-copy="share-url">Copy</button></div>
+  </label>
+  <label>Admin link (keep this private)
+    <div class="copy-row"><input readonly value="{{ admin_url }}" id="admin-url"><button type="button" class="secondary" data-copy="admin-url">Copy</button></div>
+  </label>
+</div>
+
+<div class="actions">
+  <form method="post" action="{{ url_for('admin.toggle_open', slug=trip.slug, key=key) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="secondary outline">{{ 'Close responses' if trip.is_open else 'Reopen responses' }}</button>
+  </form>
+  <form method="post" action="{{ url_for('admin.toggle_public', slug=trip.slug, key=key) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="secondary outline">{{ 'Hide results from group' if trip.results_public else 'Show results to group' }}</button>
+  </form>
+  {% if trip.results_public %}<a href="{{ url_for('trips.public_results', slug=trip.slug) }}">Public results page</a>{% endif %}
+</div>
+
+<h2>Results</h2>
+{{ results_panel(trip, results) }}
+
+{% if trip.responses %}
+<h3>Responses</h3>
+<table>
+  <thead><tr><th>Name</th><th>Top pick</th><th>Days free</th><th></th></tr></thead>
+  <tbody>
+  {% for r in trip.responses %}
+    <tr>
+      <td>{{ r.name }}</td>
+      <td>{{ r.ranks[0].location.name if r.ranks else '—' }}</td>
+      <td>{{ r.days|length }}</td>
+      <td>
+        <form method="post" action="{{ url_for('admin.delete_response', slug=trip.slug, key=key, response_id=r.id) }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="secondary outline small">Remove</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<details>
+  <summary>Edit trip settings</summary>
+  <form method="post" action="{{ url_for('admin.edit', slug=trip.slug, key=key) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Trip name <input name="name" required maxlength="120" value="{{ trip.name }}"></label>
+    <label>Description <textarea name="description" rows="2">{{ trip.description or '' }}</textarea></label>
+    <fieldset>
+      <legend>Locations <small>(unticking one removes its votes)</small></legend>
+      {% for loc in trip.locations %}
+        <label><input type="checkbox" name="keep_location" value="{{ loc.id }}" checked> {{ loc.name }}</label>
+      {% endfor %}
+      <div id="location-list"></div>
+      <button type="button" class="secondary outline" id="add-location">+ Add location</button>
+    </fieldset>
+    <div class="grid">
+      <label>Minimum days <input type="number" name="min_days" min="1" required value="{{ trip.min_days }}"></label>
+      <label>Maximum days <input type="number" name="max_days" min="1" value="{{ trip.max_days or '' }}"></label>
+    </div>
+    <div class="grid">
+      <label>From <input type="date" name="window_start" required value="{{ trip.window_start.isoformat() }}"></label>
+      <label>To <input type="date" name="window_end" required value="{{ trip.window_end.isoformat() }}"></label>
+    </div>
+    <button type="submit">Save changes</button>
+  </form>
+</details>
+
+<details>
+  <summary>Delete trip</summary>
+  <form method="post" action="{{ url_for('admin.delete_trip', slug=trip.slug, key=key) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Type <strong>{{ trip.name }}</strong> to permanently delete this trip and all responses
+      <input name="confirm_name" autocomplete="off">
+    </label>
+    <button class="contrast">Delete trip</button>
+  </form>
+</details>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='locations.js') }}"></script>
+<script src="{{ url_for('static', filename='copy.js') }}"></script>
+{% endblock %}

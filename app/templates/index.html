@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% set locs = form.getlist('locations') if form.getlist is defined else [] %}
+{% block content %}
+<hgroup>
+  <h1>Plan a trip together</h1>
+  <p>Add the places you're considering, share the link, and see where and when the group wants to go.</p>
+</hgroup>
+
+{% if my_trips %}
+<details>
+  <summary>Trips you created on this device ({{ my_trips|length }})</summary>
+  <ul>
+    {% for trip, key in my_trips %}
+      <li><a href="{{ url_for('admin.dashboard', slug=trip.slug, key=key) }}">{{ trip.name }}</a>
+        · {{ trip.responses|length }} response{{ '' if trip.responses|length == 1 else 's' }}</li>
+    {% endfor %}
+  </ul>
+</details>
+{% endif %}
+
+<form method="post" action="{{ url_for('main.create_trip') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <label>Trip name
+    <input name="name" required maxlength="120" placeholder="Summer 2027 with the uni crew" value="{{ form.get('name', '') }}">
+  </label>
+  <label>Description <small>(optional)</small>
+    <textarea name="description" rows="2" placeholder="Budget, vibe, anything people should know">{{ form.get('description', '') }}</textarea>
+  </label>
+
+  <fieldset>
+    <legend>Location options</legend>
+    <div id="location-list">
+      {% for loc in (locs if locs else ['', '']) %}
+        <div class="location-row">
+          <input name="locations" maxlength="120" placeholder="e.g. Lisbon" value="{{ loc }}">
+          <button type="button" class="secondary outline remove-location" aria-label="Remove">✕</button>
+        </div>
+      {% endfor %}
+    </div>
+    <button type="button" class="secondary outline" id="add-location">+ Add location</button>
+  </fieldset>
+
+  <div class="grid">
+    <label>Minimum trip length (days)
+      <input type="number" name="min_days" min="1" max="60" required value="{{ form.get('min_days', '3') }}">
+    </label>
+    <label>Maximum length <small>(optional)</small>
+      <input type="number" name="max_days" min="1" max="366" value="{{ form.get('max_days', '') }}">
+    </label>
+  </div>
+
+  <p class="hint">Which dates should people pick from?</p>
+  <div class="grid">
+    <label>From
+      <input type="date" name="window_start" required value="{{ form.get('window_start', '') }}">
+    </label>
+    <label>To
+      <input type="date" name="window_end" required value="{{ form.get('window_end', '') }}">
+    </label>
+  </div>
+
+  <button type="submit">Create trip</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='locations.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% from "_calendar.html" import month_grid %}
+{% macro results_panel(trip, results) %}
+{% if results.total == 0 %}
+  <article><p>No responses yet. Share the link to get started.</p></article>
+{% else %}
+<div class="grid">
+  <article class="winner">
+    <header>Most popular location</header>
+    <h2>{{ results.locations[0].name }}</h2>
+    {% if results.location_tie %}<p><mark>Tied with {{ results.locations[1].name }}</mark></p>{% endif %}
+    <small>{{ results.locations[0].points }} points · {{ results.locations[0].first_choices }} first choice{{ '' if results.locations[0].first_choices == 1 else 's' }}</small>
+  </article>
+  <article class="winner">
+    <header>Best dates</header>
+    {% if results.windows %}
+      {% set w = results.windows[0] %}
+      <h2>{{ w.start.strftime('%a %d %b') }} – {{ w.end.strftime('%a %d %b') }}</h2>
+      <small>{{ w.days }} days · {{ w.attendees|length }} of {{ results.total }} can come</small>
+    {% else %}
+      <h2>No match yet</h2>
+      <small>Nobody is free for {{ trip.min_days }} days in a row.</small>
+    {% endif %}
+  </article>
+</div>
+
+<h3>Location ranking</h3>
+<p class="hint">Ranked-choice points: with {{ results.locations|length }} options, a 1st choice is worth {{ results.locations|length }} points, a 2nd {{ results.locations|length - 1 }}, and so on.</p>
+<table>
+  <thead><tr><th>Location</th><th>Points</th><th>1st choices</th><th class="bar-col"></th></tr></thead>
+  <tbody>
+  {% for loc in results.locations %}
+    <tr>
+      <td>{{ loc.name }}</td><td>{{ loc.points }}</td><td>{{ loc.first_choices }}</td>
+      <td class="bar-col"><div class="bar" style="width: {{ (100 * loc.points / results.max_points) | round }}%"></div></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h3>Best date options</h3>
+{% if results.windows %}
+<table>
+  <thead><tr><th>Dates</th><th>Days</th><th>Can come</th><th>Can't make all of it</th></tr></thead>
+  <tbody>
+  {% for w in results.windows %}
+    <tr>
+      <td>{{ w.start.strftime('%d %b') }} – {{ w.end.strftime('%d %b') }}</td>
+      <td>{{ w.days }}</td>
+      <td>{{ w.attendees|length }}/{{ results.total }}: {{ w.attendees|join(', ') }}</td>
+      <td>{{ w.missing|join(', ') or '—' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Nobody has marked {{ trip.min_days }} consecutive free days yet.</p>
+{% endif %}
+
+<h3>Availability heatmap</h3>
+<p class="hint">Darker days have more people free. Hover a day for the count.</p>
+{{ month_grid(results.months, 'heat', counts=results.counts, max_count=results.max_count, total=results.total) }}
+{% endif %}
+{% endmacro %}

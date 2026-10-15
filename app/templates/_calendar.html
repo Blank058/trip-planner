@@ -1,0 +1,25 @@
+{# Shared month grid. Call with: months, mode ('pick' or 'heat'), and for heat: counts, max_count, total #}
+{% macro month_grid(months, mode, selected=(), counts={}, max_count=1, total=0) %}
+<div class="calendar {{ mode }}">
+  {% for month in months %}
+  <div class="month">
+    <h4>{{ month.title }}</h4>
+    <div class="weekdays"><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span></div>
+    {% for week in month.weeks %}
+    <div class="week">
+      {% for d in week %}
+        {% if not d %}
+          <span class="day empty"></span>
+        {% elif mode == 'pick' %}
+          <button type="button" class="day{{ ' selected' if d.isoformat() in selected }}" data-date="{{ d.isoformat() }}">{{ d.day }}</button>
+        {% else %}
+          {% set c = counts.get(d, 0) %}
+          <span class="day" style="--heat: {{ (c / max_count) | round(2) }}" title="{{ d.strftime('%a %d %b') }}: {{ c }} of {{ total }} free">{{ d.day }}</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}

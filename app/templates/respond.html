@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "_calendar.html" import month_grid %}
+{% block title %}{{ trip.name }} · Trip Planner{% endblock %}
+{% block content %}
+<hgroup>
+  <h1>{{ trip.name }}</h1>
+  <p>{{ trip.min_days }}+ day trip, sometime between {{ trip.window_start.strftime('%d %b') }} and {{ trip.window_end.strftime('%d %b %Y') }}</p>
+</hgroup>
+{% if trip.description %}<p>{{ trip.description }}</p>{% endif %}
+{% if existing %}<p class="flash">You've already responded. Change anything below and save again.</p>{% endif %}
+
+<form method="post" id="response-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <label>Your name
+    <input name="name" required maxlength="80" value="{{ name }}" autocomplete="name">
+  </label>
+
+  <h3>1. Rank the locations</h3>
+  <p class="hint">Drag to reorder, or use the arrows. Your favourite goes at the top.</p>
+  <ol id="rank-list" class="rank-list">
+    {% for loc in ordered_locations %}
+      <li data-id="{{ loc.id }}">
+        <span class="handle" aria-hidden="true">⠿</span>
+        <span class="loc-name">{{ loc.name }}</span>
+        <span class="arrows">
+          <button type="button" class="secondary outline move-up" aria-label="Move up">↑</button>
+          <button type="button" class="secondary outline move-down" aria-label="Move down">↓</button>
+        </span>
+      </li>
+    {% endfor %}
+  </ol>
+  <input type="hidden" name="ranking" id="ranking" value="{{ ordered_locations | map(attribute='id') | join(',') }}">
+
+  <h3>2. When are you free?</h3>
+  <p class="hint">Tap or drag across the days you could travel.</p>
+  <div class="calendar-tools">
+    <button type="button" class="secondary outline" id="select-all">Select all</button>
+    <button type="button" class="secondary outline" id="clear-all">Clear</button>
+    <span id="day-count"></span>
+  </div>
+  {{ month_grid(months, 'pick', selected=selected_days) }}
+  <input type="hidden" name="days" id="days" value="{{ selected_days | sort | join(',') }}">
+
+  <button type="submit">{{ 'Update my response' if existing else 'Submit response' }}</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/Sortable.min.js') }}"></script>
+<script src="{{ url_for('static', filename='respond.js') }}"></script>
+{% endblock %}
