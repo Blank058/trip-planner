@@ -1,0 +1,64 @@
+:root { --day-size: 2.4rem; }
+
+.brand { font-weight: 700; text-decoration: none; }
+.hint { color: var(--pico-muted-color); font-size: 0.9rem; margin-bottom: 0.5rem; }
+.flash { padding: 0.75rem 1rem; border-radius: var(--pico-border-radius); background: var(--pico-card-sectioning-background-color); }
+.errors { border-left: 4px solid var(--pico-del-color); }
+.created { border-left: 4px solid var(--pico-ins-color); }
+
+/* create form */
+.location-row { display: flex; gap: 0.5rem; }
+.location-row input { flex: 1; }
+.location-row button { width: auto; }
+
+/* ranking */
+.rank-list { padding-left: 1.5rem; }
+.rank-list li {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.5rem 0.75rem; margin-bottom: 0.4rem;
+  background: var(--pico-card-background-color);
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  list-style-position: outside;
+}
+.rank-list .handle { cursor: grab; color: var(--pico-muted-color); user-select: none; }
+.rank-list .loc-name { flex: 1; }
+.rank-list .arrows { display: flex; gap: 0.25rem; }
+.rank-list .arrows button { padding: 0.1rem 0.5rem; margin: 0; }
+
+/* calendar */
+.calendar { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; user-select: none; }
+.calendar h4 { margin-bottom: 0.4rem; font-size: 1rem; }
+.weekdays, .week { display: grid; grid-template-columns: repeat(7, var(--day-size)); gap: 3px; }
+.weekdays span { text-align: center; font-size: 0.75rem; color: var(--pico-muted-color); }
+.day {
+  width: var(--day-size); height: var(--day-size);
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; margin: 0; font-size: 0.85rem;
+  border-radius: 6px; border: 1px solid var(--pico-muted-border-color);
+  background: transparent; color: inherit;
+  transition: none;
+}
+.day.empty { border: none; }
+.calendar.pick .day { cursor: pointer; touch-action: none; }
+.calendar.pick .day.selected { background: var(--pico-primary-background); color: #fff; border-color: var(--pico-primary-background); }
+.calendar.heat .day { background: color-mix(in srgb, var(--pico-primary-background) calc(var(--heat) * 100%), transparent); }
+.calendar-tools { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; }
+.calendar-tools button { width: auto; margin: 0; padding: 0.3rem 0.8rem; }
+
+/* results */
+.winner h2 { margin-bottom: 0.25rem; }
+.bar-col { width: 35%; }
+.bar { height: 0.8rem; border-radius: 4px; background: var(--pico-primary-background); min-width: 2px; }
+
+/* admin */
+.copy-row { display: flex; gap: 0.5rem; }
+.copy-row input { flex: 1; }
+.copy-row button { width: auto; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1rem; }
+.actions form { margin: 0; }
+.actions button { width: auto; margin: 0; }
+form.inline { margin: 0; }
+button.small { padding: 0.2rem 0.6rem; margin: 0; font-size: 0.85rem; }
+
+@media (max-width: 420px) { :root { --day-size: 2.1rem; } .bar-col { display: none; } }

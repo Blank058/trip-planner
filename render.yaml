@@ -1,0 +1,16 @@
+# Render Blueprint: Render reads this file to create the web service.
+# See docs/DEPLOY.md for the step-by-step guide.
+services:
+  - type: web
+    name: trip-planner
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false  # you paste the Supabase connection string in the Render dashboard

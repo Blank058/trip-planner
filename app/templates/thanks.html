@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Thanks · {{ trip.name }}{% endblock %}
+{% block content %}
+<h1>Thanks, you're in! 🎉</h1>
+<p>Your response to <strong>{{ trip.name }}</strong> is saved. You can come back to this link on this device to change it.</p>
+<p><a href="{{ url_for('trips.respond', slug=trip.slug) }}">Edit my response</a>
+{% if trip.results_public %} · <a href="{{ url_for('trips.public_results', slug=trip.slug) }}">See results so far</a>{% endif %}</p>
+{% endblock %}
